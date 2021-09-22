@@ -24,25 +24,39 @@ def ShowData(x, y, color):
 def ImportData(sales_data, col_title):
 
     x = pd.DataFrame(sales_data, columns=[col_title])
+    train_data = [] 
     test_data =[]
-    i = 20
+    i = 0
 
-    while i <= len(x):
+    while i <= len(list(x.T)) - 1:
 
-        test_data.append(x.pop(i))
+        if i < 19:
+            train_data.append(x.T.values[0][i])
+        if i >= 19:
+            test_data.append(x.T.values[0][i])
+
+        i += 1
     
-    return x, test_data
+    return train_data, test_data
 
+def TestModel(x_test):
+
+    for data in x_test:
+
+        x_new   = [[data]]
+        print(model2.predict(x_new))
 
 if __name__ == '__main__':
     # Load the data
     sales_data = pd.read_excel('Homework_1/mlr05.xls', 'Mlr05')
-    x1 = pd.DataFrame(sales_data, columns=['X1'])
-    x2 = pd.DataFrame(sales_data, columns=['X2'])
-    x3 = pd.DataFrame(sales_data, columns=['X3'])
-    x4 = pd.DataFrame(sales_data, columns=['X4'])
-    x5 = pd.DataFrame(sales_data, columns=['X5'])
-    x6 = pd.DataFrame(sales_data, columns=['X6'])
+    # x1 = pd.DataFrame(sales_data, columns=['X1'])
+    x1, x_test = ImportData(sales_data, 'X1')
+    x2, x2_test = ImportData(sales_data, 'X2')
+    # x2 = pd.DataFrame(sales_data, columns=['X2'])
+    # x3 = pd.DataFrame(sales_data, columns=['X3'])
+    # x4 = pd.DataFrame(sales_data, columns=['X4'])
+    # x5 = pd.DataFrame(sales_data, columns=['X5'])
+    # x6 = pd.DataFrame(sales_data, columns=['X6'])
     # print(x1)
     # print(x2)
 
@@ -50,7 +64,7 @@ if __name__ == '__main__':
 
 
     # Visualize the data
-    ShowData(x2, x1, 'ro')
+    # ShowData(x2, x1, 'ro')
     # ShowData(x3, x1, 'bo')
     # ShowData(x4, x1, 'go')
     # ShowData(x5, x1, 'co')
@@ -59,18 +73,19 @@ if __name__ == '__main__':
 
     # Select a linear model
     model2 = sklearn.linear_model.LinearRegression()
-    model3 = sklearn.linear_model.LinearRegression()
-    model4 = sklearn.linear_model.LinearRegression()
-    model5 = sklearn.linear_model.LinearRegression()
-    model6 = sklearn.linear_model.LinearRegression()
+    # model3 = sklearn.linear_model.LinearRegression()
+    # model4 = sklearn.linear_model.LinearRegression()
+    # model5 = sklearn.linear_model.LinearRegression()
+    # model6 = sklearn.linear_model.LinearRegression()
 
     # # Train the model
     model2.fit(x2,x1)
-    model3.fit(x3,x1)
-    model4.fit(x4,x1)
-    model5.fit(x5,x1)
-    model6.fit(x6,x1)
+    # model3.fit(x3,x1)
+    # model4.fit(x4,x1)
+    # model5.fit(x5,x1)
+    # model6.fit(x6,x1)
 
     # Make a prediction
-    X_new = [[4]]
-    print(model2.predict(X_new))
+    # X_new = [[4]]
+    # print(model2.predict([x2_test]))
+    TestModel(x2_test)
