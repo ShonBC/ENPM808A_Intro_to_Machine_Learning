@@ -27,25 +27,55 @@ The algorithm above is a variant of the so-called Adaline (Adaptive LinearNeuron
 for perceptron learning.
 """
 
-import matplotlib as plt
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn.linear_model
 
-# Load the data
+# Generate random data points
+train_data = np.random.randint(0, high=1000, size=(2, 100)).T
+# print(train_data[1][0], train_data[1][1])
+# print(train_data)
 
+test_data = np.random.randint(0, high=1000, size=(2, 10000)).T
+# print(test_data)
 
-# Prepare the data
+n = 100
 
+# Define target function
+m = 12
+x = np.array(range(0, 1000))
+b = 125
+y = m*x+b
+plt.plot(x, y)
+plt.title('Target Function')
+plt.show()  
 
-# Visualize the data
+def TestPoint(target_function, x_point):
 
+    pass
 
-# Select a linear model
-model = sklearn.linear_model.LinearRegression()
+def Perceptron(train_data):
+  
+    it = 0
+    max_updates = 1000
 
-# Train the model
-model.fit()
+    while it <= max_updates:
 
-# Make a prediction
+        idx = np.random.randint(0, high= 1000)
+        x = train_data[idx][0]
+        y = train_data[idx][1]
+        w_t = 0
+        s = 0
 
+        if s * y > 1:
+            pass
+
+        else:
+
+            w_t1 = w_t + n(y - s) * x
+
+        it += 1
+
+# Perceptron()
