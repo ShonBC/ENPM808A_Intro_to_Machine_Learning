@@ -33,30 +33,11 @@ import numpy as np
 import pandas as pd
 import sklearn.linear_model
 
-# Generate random data points
-train_data = np.random.randint(0, high=1000, size=(2, 100)).T
-# print(train_data[1][0], train_data[1][1])
-# print(train_data)
-
-test_data = np.random.randint(0, high=1000, size=(2, 10000)).T
-# print(test_data)
-
-n = 100
-
-# Define target function
-m = 12
-x = np.array(range(0, 1000))
-b = 125
-y = m*x+b
-plt.plot(x, y)
-plt.title('Target Function')
-plt.show()  
-
 def TestPoint(target_function, x_point):
 
     pass
 
-def Perceptron(train_data):
+def Perceptron(train_data, n):
   
     it = 0
     max_updates = 1000
@@ -78,4 +59,23 @@ def Perceptron(train_data):
 
         it += 1
 
-# Perceptron()
+if __name__ == '__main__':
+
+    # Generate random data points
+    train_data = np.random.randint(0, high=1000, size=(2, 100)).T
+    # print(train_data[1][0], train_data[1][1])
+    # print(train_data)
+
+    test_data = np.random.randint(0, high=1000, size=(2, 10000)).T
+
+    n = 100
+
+    # Define target function
+    m = 12
+    x = np.array(range(0, 1000))
+    b = 125
+    y = m*x+b
+    plt.plot(x, y)
+    plt.title('Target Function')
+    plt.show()  
+    # Perceptron()
