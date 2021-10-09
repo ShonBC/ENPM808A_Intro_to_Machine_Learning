@@ -49,9 +49,10 @@ class Perceptron:
             x (list): input data (x, y) points
 
         Returns:
-            [int]: 1 if the point is properly classified, -1 is point is misclassified
+            [int]: 1 if the point is above the line, -1 if the point is below.
         """
 
+        # h(x) = w0*x + w1*y
         y = x[0] * self.w[0] + x[1] * self.w[1]
 
         if y >= 0:
@@ -60,7 +61,7 @@ class Perceptron:
             return -1
 
     def Weight(self, x, err):
-        """Recalculates the weight vector based off the new error.
+        """Recalculates the weight vector based off the new error. w(t+ 1)←w(t) +η.(y(t)−s(t)).x(t)
 
         Args:
             x (list): input data (x, y) points
@@ -97,9 +98,8 @@ class Perceptron:
             it += 1
 
             if total_err == 0 or it >= max_updates:
-                print(f'Iterated {it} iterations.')
-                iterating = False   
-        
+                print(f'Iterated {it} times.')
+                iterating = False           
 
     def Data(total_samples):
         """Generates random data points to either test or train with.
@@ -140,23 +140,33 @@ class Perceptron:
         perceptron.n = n
         perceptron.Train(train_data)
 
+        err_count = 0
+
         for x in test_data:
 
-            err = perceptron.Output(x) 
+            out = perceptron.Output(x) 
 
-            if err == 1: # Properly classified
+            if out != x[2]:
+
+                err_count += 1
+                plt.plot(x[0], x[1], 'ro')
+
+            elif out == x[2]: # One side of the live
 
                 plt.plot(x[0], x[1], 'go')
 
-            else: # Incorrectly classified
+            # else: # Other side of line
 
-                plt.plot(x[0], x[1], 'ro')
+            #     plt.plot(x[0], x[1], 'ro')
 
-        n = linalg.norm(perceptron.w)
-        ww = perceptron.w / n
-        ww1 = [ww[1], -ww[0]]
-        ww2 = [-ww[1], ww[0]]
-        plt.plot([ww1[0], ww2[0]], [ww1[1], ww2[1]], '-k')
+        print(err_count)
+
+        # Plot the data separation line
+        norm = linalg.norm(perceptron.w)
+        weight = perceptron.w / norm
+        sep_points1 = [weight[1], -weight[0]]
+        sep_points2 = [-weight[1], weight[0]]
+        plt.plot([sep_points1[0], sep_points2[0]], [sep_points1[1], sep_points2[1]], '-k')
         plt.show()
 
 if __name__ == '__main__':
