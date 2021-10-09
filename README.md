@@ -2,4 +2,4 @@
 Assignments for ENPM808A Introduction to Machine Learning
 
 Shon Cortes
-Homework 1
+Homework 2
