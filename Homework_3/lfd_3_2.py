@@ -46,6 +46,8 @@ if __name__ == '__main__':
         its.append(num_its)
         threoticals_ts.append(theoretical_t)
 
+    plt.xlabel("Number of Iterations")
+    plt.ylabel("Seperation")
     plt.plot(seps, its, marker='.')
     plt.show()
     
