@@ -49,8 +49,8 @@ def load_data(filepath, delimiter=",", dtype=float):
 
 def GetMatrix(data):
     a=[]
-    for i in range(1, len(train_data[0])): # Row, col
-        if train_data[-1][i] > 100:
+    for i in range(1, len(data[0])): # Row, col
+        if data[-1][i] > 100:
             a.append(1)
         else:
             a.append(0)
@@ -92,8 +92,14 @@ def ShowData(x, y, label):
 
 if __name__ == "__main__":
 
-    train_data = load_data("MNIST_data/mnist_train_binary.csv", ",", float)
-    test_data = load_data("MNIST_data/mnist_test_binary.csv", ",", float)
+    # train_data = load_data("MNIST_data/mnist_train_binary.csv", ",", float)
+    # test_data = load_data("MNIST_data/mnist_test_binary.csv", ",", float)
+
+    train_data = 
+    test_data = 
+
+    train_data = np.asarray(train_data)
+    print(train_data.shape)
 
     # a=[]
     # for j in range(1, len(train_data[0])): # Row, col
@@ -108,7 +114,7 @@ if __name__ == "__main__":
 
     inten = Intensity(train_data)
     sym = Symmetry(train_data)
-    label = Labels(train_data)
+    label = np.asarray(Labels(train_data))
     # print(label)
     # plt.plot(inten, sym)
     # plt.show()
@@ -117,16 +123,16 @@ if __name__ == "__main__":
     # # print(len(train_data))
     # for i in range(0, len(train_data)): # Row, col
     #     label.append(train_data[i][0])    
-    # print(len(label))
-    # print(len(inten))
-    # print(len(sym))
+    print(label.shape)
+    print(len(inten))
+    print(len(sym))
 
     # ShowData(inten, sym, label)
     # for i in range(len(label)):
     #     if label[i] == 1:
     #         plt.plot(x[i], y[i], 'bo')
     # for i in range(len(label)):
-    plt.scatter(inten, sym)
-    plt.xlabel("Intensity")
-    plt.ylabel("Symmetry")
-    plt.show()
+    # plt.scatter(inten, sym)
+    # plt.xlabel("Intensity")
+    # plt.ylabel("Symmetry")
+    # plt.show()
