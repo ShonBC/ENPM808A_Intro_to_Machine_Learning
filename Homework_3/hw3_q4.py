@@ -18,121 +18,145 @@ bounds, one based on Ein and one based on Etest. Use a tolerance δ =
 with or without the 3rd order polynomial transform? Explain.
 """
 
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import matplotlib
+import os
+import libs.libs
+import numpy as np
+import pandas as pd
+from matplotlib import style
 import matplotlib.pyplot as plt
 import sklearn.linear_model
-import csv
+import sklearn.metrics
 
-# data_path = "MNIST_data/"
-# train_data = np.loadtxt(data_path + "mnist_train_binary.csv", 
-#                         delimiter=",")
-# test_data = np.loadtxt(data_path + "mnist_test_binary.csv", 
-#                        delimiter=",") 
+style.use("ggplot")
 
-# # Read data
-# train_data = pd.read_csv('MNIST_data/mnist_test_binary.csv',thousands=',')
-# train_data.info()
 
-def load_data(filepath, delimiter=",", dtype=float):
-    """Load a numerical numpy array from a file."""
+def show_ima(X):
+    # get single digit graphical data
+    # to display it, we need to convert single line of 784 values to 28x28 square
+    digit_image = X.reshape(28, 28)
 
-    print(f"Loading {filepath}...")
-    with open(filepath, "r") as f:
-        data_iterator = csv.reader(f, delimiter=delimiter)
-        next(data_iterator) # Skip first row header information
-        data_list = list(data_iterator)
-    data = np.asarray(data_list, dtype=dtype)
-    print("Done.")
-    return data
+    plt.imshow(digit_image, cmap=matplotlib.cm.binary, interpolation="nearest")
+    plt.axis("off")
+    plt.show()
 
-def GetMatrix(data):
-    a=[]
-    for i in range(1, len(data[0])): # Row, col
-        if data[-1][i] > 100:
-            a.append(1)
-        else:
-            a.append(0)
-    return a
+def intensity(x):
+    x = np.mean(x, axis=1)
+    return x/255
 
-def Intensity(data):
-    inten = []
-    for i in range(len(data)):
-        a = GetMatrix(data)
-        inten.append(np.mean(a))
-    return inten
+def symmetry(x):
+    new = x-np.flip(x, axis=1)
+    new = np.mean(np.abs(new), axis=1)
+    return -new/255
 
-def Symmetry(data):
-    sym = []
+def LinearReg(x1, x, x_test):
+    """Show plot of the train data. Train the linear model using Linear Regression and use test data to test the model.
 
-    for i in range(len(data)):
-        a = GetMatrix(data)
-        sym.append(np.mean(np.abs(a - np.flip(a))))
-    return sym
+    Args:
+        x1 ([type]): Target output data
+        x ([type]): Input data
+        x_test ([list]): Input data to test the model
+    """
 
-def Labels(data):
-    label = []
-
-    for i in range(0, len(data)): # Row, col
-        label.append(data[i][0]) 
-    return label
-
-def ShowData(x, y, label):
-    x_range = []
-    y_range = []
-    for i in range(len(label)):
-        if label[i] == 1:
-            plt.plot(x[i], y[i], 'bo')
-        else:
-            plt.plot(x[i], y[i], 'co')
+    # Select a linear model
+    model = sklearn.linear_model.LinearRegression()
     
-    plt.xlabel("Intensity")
-    plt.ylabel("Symmetry")
+    # # Train the model
+    x = x.reshape(len(x),1)
+    x1 = x1.reshape(len(x1),1)
+    model.fit(x, x1)
 
-if __name__ == "__main__":
+    # Make a prediction
+    TestModel(x_test, model)
 
-    # train_data = load_data("MNIST_data/mnist_train_binary.csv", ",", float)
-    # test_data = load_data("MNIST_data/mnist_test_binary.csv", ",", float)
 
-    train_data = 
-    test_data = 
+def TestModel(x_test, model):
+    """Tests the given model using the input test data.
 
-    train_data = np.asarray(train_data)
-    print(train_data.shape)
+    Args:
+        x_test ([list]): Input data to test model
+        model ([type]): Trained model to test
+    """
 
-    # a=[]
-    # for j in range(1, len(train_data[0])): # Row, col
-    #     if train_data[-1][j] > 100:
-    #         a.append(1)
-    #     else:
-    #         a.append(0)
+    y_test = x_test['label']
+    X_test = x_test.drop(['label'], axis=1)
 
-    # a = np.reshape(a, (28, 28))
-    # print(np.mean(a))
-    # print(a)
+    X_test = X_test.values
+    y_test = y_test.values
 
-    inten = Intensity(train_data)
-    sym = Symmetry(train_data)
-    label = np.asarray(Labels(train_data))
-    # print(label)
-    # plt.plot(inten, sym)
-    # plt.show()
+    inten_test = intensity(X_test)
+    sym_test = symmetry(X_test)
+    inten_test = inten_test.reshape(len(inten_test),1)
+    sym_test = sym_test.reshape(len(sym_test),1)
+    # print(model.score(X_test, y_test))
+    predict_test = model.predict(inten_test)
+    print(f'MSE: [{sklearn.metrics.mean_squared_error(sym_test, predict_test)*100}%]')
 
-    # label = []
-    # # print(len(train_data))
-    # for i in range(0, len(train_data)): # Row, col
-    #     label.append(train_data[i][0])    
-    print(label.shape)
-    print(len(inten))
-    print(len(sym))
+def Error(x, y, w, num_points):
 
-    # ShowData(inten, sym, label)
-    # for i in range(len(label)):
-    #     if label[i] == 1:
-    #         plt.plot(x[i], y[i], 'bo')
-    # for i in range(len(label)):
-    # plt.scatter(inten, sym)
-    # plt.xlabel("Intensity")
-    # plt.ylabel("Symmetry")
-    # plt.show()
+    err = 0
+    for i in range(num_points):
+        err += ((y[i] * x[i])/ (1 + np.exp((y[i] * w[1]) * (x[i] * w[0]))))
+    return err     
+
+def LogGradDescent(x, y, itterations = 100):
+    w_0 = [0, 0]
+    n = 0.1 # Step size
+    w = w_0
+    num_data_points = len(x)
+    for i in range(itterations):
+        g = -(1/num_data_points) * Error(x, y, w, num_data_points)
+        v = -g
+        w = w + (n * v)
+    return w
+    ## h(x,y) = w0*x + w1*y
+    # h = x * w[0] + y * w[1]
+    
+
+print(os.listdir("MNIST_data"))
+
+# get data
+train = pd.read_csv("MNIST_data/mnist_train_binary.csv")
+y = train['label']
+X = train.drop(['label'], axis=1)
+
+#X = X.values.reshape(-1,28,28)
+X = X.values
+y = y.values
+
+# get data
+test_data = pd.read_csv("MNIST_data/mnist_test_binary.csv")
+
+# delete train to gain some space
+del train
+
+print("Shape of X:{0}".format(X.shape))
+print("Shape of y:{0}".format(y.shape))
+
+inten = intensity(X)
+sym = symmetry(X)
+
+df = pd.DataFrame({'Intensity':inten.flatten(), 'Symmetry':sym.flatten(), 'y':y.flatten()})
+df['x0'] = 1
+df = df[['x0','Intensity','Symmetry','y']]
+ones = df.loc[df['y']==1]
+fives = df.loc[df['y']==5]
+
+# Data
+
+eta = 1
+use_adaline = False
+maxit = 1000
+dim = 2
+
+figsize = plt.figaspect(1)
+fig, ax1 = plt.subplots(1, 1, figsize=figsize)
+ps = ax1.scatter(ones[['Intensity']].values, ones[['Symmetry']].values, marker='+', c= 'b', label='+1 labels')
+ns = ax1.scatter(fives[['Intensity']].values, fives[['Symmetry']].values, marker=r'$-$', c= 'r', label='-1 labels')
+
+norm_g, num_its, _ = libs.libs.PLA(df.values, dim, maxit, use_adaline, eta, randomize=False, print_out = True)
+# hypothesis = ax1.plot(inten, (norm_g[0]+norm_g[1]*inten), c = 'g', label='Final Hypothesis')
+LinearReg(sym, inten, test_data)
+# plt.show()
+
+print(LogGradDescent(inten, sym))
