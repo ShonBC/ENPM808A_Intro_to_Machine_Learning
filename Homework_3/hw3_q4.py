@@ -67,7 +67,7 @@ def LinearReg(x1, x, x_test):
     model.fit(x, x1)
 
     # Make a prediction
-    TestModel(x_test, model)
+    return TestModel(x_test, model)
 
 
 def TestModel(x_test, model):
@@ -90,7 +90,10 @@ def TestModel(x_test, model):
     sym_test = sym_test.reshape(len(sym_test),1)
     # print(model.score(X_test, y_test))
     predict_test = model.predict(inten_test)
-    print(f'MSE: [{sklearn.metrics.mean_squared_error(sym_test, predict_test)*100}%]')
+    print(f'E_out for Linear Regression: [{sklearn.metrics.mean_squared_error(sym_test, predict_test)*100}%]')
+
+    plt.plot(inten_test, predict_test, 'm')
+    return inten_test, sym_test, y_test
 
 def Error(x, y, w, num_points):
 
@@ -111,7 +114,19 @@ def LogGradDescent(x, y, itterations = 100):
     return w
     ## h(x,y) = w0*x + w1*y
     # h = x * w[0] + y * w[1]
-    
+
+def PlotTestData(x, y, labels, w):
+        
+    one = []
+    five = []
+
+    for i in range(len(x)):
+        if x[i] * w[0] + y[i] * w[1] > 0:
+            one.append((x[i], y[i]))
+        else:
+            five.append((x[i], y[i]))
+    plt.scatter(one[0], one[1], 'c')
+    plt.scatter(five[0], five[1], 'g')
 
 print(os.listdir("MNIST_data"))
 
@@ -130,8 +145,8 @@ test_data = pd.read_csv("MNIST_data/mnist_test_binary.csv")
 # delete train to gain some space
 del train
 
-print("Shape of X:{0}".format(X.shape))
-print("Shape of y:{0}".format(y.shape))
+# print("Shape of X:{0}".format(X.shape))
+# print("Shape of y:{0}".format(y.shape))
 
 inten = intensity(X)
 sym = symmetry(X)
@@ -154,9 +169,18 @@ fig, ax1 = plt.subplots(1, 1, figsize=figsize)
 ps = ax1.scatter(ones[['Intensity']].values, ones[['Symmetry']].values, marker='+', c= 'b', label='+1 labels')
 ns = ax1.scatter(fives[['Intensity']].values, fives[['Symmetry']].values, marker=r'$-$', c= 'r', label='-1 labels')
 
-norm_g, num_its, _ = libs.libs.PLA(df.values, dim, maxit, use_adaline, eta, randomize=False, print_out = True)
+norm_g, num_its, _ = libs.libs.PLA(df.values, dim, maxit, use_adaline, eta, randomize=False, print_out = False)
 # hypothesis = ax1.plot(inten, (norm_g[0]+norm_g[1]*inten), c = 'g', label='Final Hypothesis')
-LinearReg(sym, inten, test_data)
-# plt.show()
-
-print(LogGradDescent(inten, sym))
+inten_test, sym_test, test_labels = LinearReg(sym, inten, test_data)
+w = LogGradDescent(inten, sym)
+print(f'Logistic Gradient Descent weights: {w}')
+linex = np.arange(0.0, 0.4, 0.01)
+liney = (linex * w[0]) + w[1]
+plt.plot(linex, liney, 'g')
+plt.xlabel("Intensity")
+plt.ylabel("Symmetry")
+plt.legend(['Linear Regression','Logestic Gradient Descent', '1', 
+            '5',  ], 
+            loc='upper right')
+# PlotTestData(inten_test, sym_test, test_labels, w)
+plt.show()
