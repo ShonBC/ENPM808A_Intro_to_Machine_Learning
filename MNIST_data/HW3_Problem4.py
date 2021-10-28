@@ -36,7 +36,9 @@ def symmetry(x):
 def LinReg(feature, label, show_plot=False):
     lin_reg = LinearRegression()
     lin_reg.fit(feature, label)
-    # w_lin = lin_reg.coef_
+
+    """ Very close result to np.matmul()"""
+    # w_lin1 = lin_reg.coef_
 
     w_lin = np.matmul(np.matmul(np.linalg.inv(np.matmul(feature.T,feature)),feature.T),label)
 
@@ -143,7 +145,7 @@ def main():
     # Scale data to be between 0 and 1
     test_X  = (data.T[1:]).T/255
 
-    # Define training features vector (X_train)
+    # Define training features vector (X_train) pad with data set with a 1
     train_feature = []
     for curX in train_X:
         cur_intn = intensity(curX.reshape((28, 28)))
