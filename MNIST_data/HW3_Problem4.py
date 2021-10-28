@@ -98,7 +98,7 @@ def Pocket(feature, label, weight, show_plot=False):
         
     return w_poc, Eout
 
-def LogRegression(feature, label, show_plot=False):
+def ThirdOrdLogReg(feature, label, show_plot=False):
     # Logistic Regression
     log_reg = LogisticRegression()
     log_reg.fit(feature, label)
@@ -108,7 +108,7 @@ def LogRegression(feature, label, show_plot=False):
 
     # y_plot = - w_log[1]/w_log[2]*x_plot - w_log[0]/w_log[2]
 
-
+    # 3rd Order Polynomial feature transform
     x1 = feature[:,1]
     x2 = feature[:,2]
     train_poly = np.column_stack((feature,x1**2,x1*x2,x2**2,x1**3,x1**2*x2,x1*x2**2,x2**3))
@@ -125,6 +125,56 @@ def LogRegression(feature, label, show_plot=False):
         cs = plt.contour(x,y,z,levels)
     
     return w_poly 
+
+def LogReg(feature, label, test_feature, test_label, show_plot=False):
+    log_reg = LogisticRegression()
+    log_reg.fit(feature, label)
+    # w_log = log_reg.coef_ # weights obtained from logistic regression
+    w_log = np.matmul(np.matmul(np.linalg.inv(np.matmul(feature.T,feature)),feature.T),label)
+
+    if show_plot:
+        # plot training data with hypothesis from logistic regression
+        # plt.figure()
+        x = np.linspace(-0.4,0.4,100)
+        y = np.linspace(-0.3,0.3,100)
+        x,y = np.meshgrid(x,y)
+        z = 1/(1+np.exp(-1*w_log[0] - x*w_log[1] - y*w_log[2]))
+        levels = np.array([0.5])
+        plt.scatter(feature[:6742,1],feature[:6742,2],c='b',label='1',marker='+')
+        plt.scatter(feature[6742:,1],feature[6742:,2],c='r',label='5',marker='o')
+        cs = plt.contour(x,y,z,levels)
+    
+    # compute ein
+    Ein = 0
+
+    for i in range(0,len(feature)):
+        currentX = feature[i].reshape(-1,feature.shape[1])
+        currentY = label[i] 
+        currentH = 1/(1+np.exp(-np.dot(currentX, w_log.T)))
+        if currentH <= 0.5:
+            current_predict = -1
+        else:
+            current_predict = +1
+        if currentY != current_predict:
+            Ein +=1
+    print('In-sample error with logistic regression:', Ein/12163)
+
+    #compute etest
+    Etest = 0
+
+    for i in range(0,len(test_feature)):
+        currentX = test_feature[i].reshape(-1,test_feature.shape[1])
+        currentY = test_label[i] 
+        currentH = 1/(1+np.exp(-np.dot(currentX, w_log.T)))
+        if currentH <= 0.5:
+            current_predict = -1
+        else:
+            current_predict = +1
+        if currentY != current_predict:
+            Etest +=1
+    print('Test error with linear regression+pocket:', Etest/(len(test_feature)))
+
+    return w_log, Ein, Etest
 
 def main():
     # Define Training Data
@@ -161,9 +211,10 @@ def main():
         test_feature = np.append(test_feature,(1,cur_intn,cur_symm))
     test_feature = np.reshape(test_feature,(2027,3))
 
-    w_lin = LinReg(train_feature, train_Y, True)
-    w_poc, Eout_poc = Pocket(train_feature, train_Y, w_lin, True)
-    w_reg = LogRegression(train_feature, train_Y, True)
+    w_lin = LinReg(train_feature, train_Y, False)
+    w_poc, Eout_poc = Pocket(train_feature, train_Y, w_lin, False)
+    w_log, Ein, Etest = LogReg(train_feature, train_Y, test_feature, test_Y, True)
+    w_reg = ThirdOrdLogReg(train_feature, train_Y, False)
     plt.show()
 
 if __name__ == '__main__':
