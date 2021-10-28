@@ -20,12 +20,14 @@ with or without the 3rd order polynomial transform? Explain.
 
 import matplotlib
 import os
+
+from numpy.core.fromnumeric import repeat
 import libs.libs
 import numpy as np
 import pandas as pd
 from matplotlib import style
 import matplotlib.pyplot as plt
-import sklearn.linear_model
+from sklearn.linear_model import LinearRegression
 import sklearn.metrics
 
 style.use("ggplot")
@@ -49,7 +51,7 @@ def symmetry(x):
     new = np.mean(np.abs(new), axis=1)
     return -new/255
 
-def LinearReg(x1, x, x_test):
+def LinearReg(x1, x, x_test, lables):
     """Show plot of the train data. Train the linear model using Linear Regression and use test data to test the model.
 
     Args:
@@ -64,7 +66,8 @@ def LinearReg(x1, x, x_test):
     # # Train the model
     x = x.reshape(len(x),1)
     x1 = x1.reshape(len(x1),1)
-    model.fit(x, x1)
+    features = [1, x, x1]
+    model.fit(features, lables)
 
     # Make a prediction
     return TestModel(x_test, model)
@@ -103,7 +106,7 @@ def Error(x, y, w, num_points):
     return err     
 
 def LogGradDescent(x, y, itterations = 100):
-    w_0 = [0, 0]
+    w_0 = [1, 0, 0]
     n = 0.1 # Step size
     w = w_0
     num_data_points = len(x)
@@ -128,59 +131,87 @@ def PlotTestData(x, y, labels, w):
     plt.scatter(one[0], one[1], 'c')
     plt.scatter(five[0], five[1], 'g')
 
-print(os.listdir("MNIST_data"))
+def Test(x, y, y_test):
+    lin_reg = LinearRegression()
+    lin_reg.fit(x, y)
+    w =lin_reg()
+    # pocket
+    # loop:
+    # pick misclas point
+    # error 
+    # update weights
+    # compare error with previous w error
+    # repeat until t_max
 
-# get data
-train = pd.read_csv("MNIST_data/mnist_train_binary.csv")
-y = train['label']
-X = train.drop(['label'], axis=1)
 
-#X = X.values.reshape(-1,28,28)
-X = X.values
-y = y.values
+    y_preditct = lin_reg.predict()
+    print(np.sum((y_preditct - y_test)**2) / np.sum(y_test**2))
 
-# get data
-test_data = pd.read_csv("MNIST_data/mnist_test_binary.csv")
+if __name__ == '__main__':
+    # print(os.listdir("MNIST_data"))
 
-# delete train to gain some space
-del train
+    # get data
+    train = pd.read_csv("MNIST_data/mnist_train_binary.csv")
+    y = train['label']
+    X = train.drop(['label'], axis=1)
 
-# print("Shape of X:{0}".format(X.shape))
-# print("Shape of y:{0}".format(y.shape))
+    #X = X.values.reshape(-1,28,28)
+    X = X.values
+    y = y.values
 
-inten = intensity(X)
-sym = symmetry(X)
+    # get data
+    test_data = pd.read_csv("MNIST_data/mnist_test_binary.csv")
 
-df = pd.DataFrame({'Intensity':inten.flatten(), 'Symmetry':sym.flatten(), 'y':y.flatten()})
-df['x0'] = 1
-df = df[['x0','Intensity','Symmetry','y']]
-ones = df.loc[df['y']==1]
-fives = df.loc[df['y']==5]
+    y_test = test_data['label']
+    X_test = test_data.drop(['label'], axis=1)
 
-# Data
+    X_test = X_test.values
+    y_test = y_test.values
 
-eta = 1
-use_adaline = False
-maxit = 1000
-dim = 2
+    # delete train to gain some space
+    del train
 
-figsize = plt.figaspect(1)
-fig, ax1 = plt.subplots(1, 1, figsize=figsize)
-ps = ax1.scatter(ones[['Intensity']].values, ones[['Symmetry']].values, marker='+', c= 'b', label='+1 labels')
-ns = ax1.scatter(fives[['Intensity']].values, fives[['Symmetry']].values, marker=r'$-$', c= 'r', label='-1 labels')
+    # print("Shape of X:{0}".format(X.shape))
+    # print("Shape of y:{0}".format(y.shape))
 
-norm_g, num_its, _ = libs.libs.PLA(df.values, dim, maxit, use_adaline, eta, randomize=False, print_out = False)
-# hypothesis = ax1.plot(inten, (norm_g[0]+norm_g[1]*inten), c = 'g', label='Final Hypothesis')
-inten_test, sym_test, test_labels = LinearReg(sym, inten, test_data)
-w = LogGradDescent(inten, sym)
-print(f'Logistic Gradient Descent weights: {w}')
-linex = np.arange(0.0, 0.4, 0.01)
-liney = (linex * w[0]) + w[1]
-plt.plot(linex, liney, 'g')
-plt.xlabel("Intensity")
-plt.ylabel("Symmetry")
-plt.legend(['Linear Regression','Logestic Gradient Descent', '1', 
-            '5',  ], 
-            loc='upper right')
-# PlotTestData(inten_test, sym_test, test_labels, w)
-plt.show()
+    inten = intensity(X)
+    sym = symmetry(X)
+    inten = inten.reshape(len(inten), 1)
+    sym = sym.reshape(len(sym), 1)
+    y = y.reshape(len(y), 1)
+    features = [inten, sym]
+    Test(features, y, y_test)
+
+    # df = pd.DataFrame({'Intensity':inten.flatten(), 'Symmetry':sym.flatten(), 'y':y.flatten()})
+    # df['x0'] = 1
+    # df = df[['x0','Intensity','Symmetry','y']]
+    # ones = df.loc[df['y']==1]
+    # fives = df.loc[df['y']==5]
+
+    # # Data
+
+    # eta = 1
+    # use_adaline = False
+    # maxit = 1000
+    # dim = 2
+
+    # figsize = plt.figaspect(1)
+    # fig, ax1 = plt.subplots(1, 1, figsize=figsize)
+    # ps = ax1.scatter(ones[['Intensity']].values, ones[['Symmetry']].values, marker='+', c= 'b', label='+1 labels')
+    # ns = ax1.scatter(fives[['Intensity']].values, fives[['Symmetry']].values, marker=r'$-$', c= 'r', label='-1 labels')
+
+    # norm_g, num_its, _ = libs.libs.PLA(df.values, dim, maxit, use_adaline, eta, randomize=False, print_out = False)
+    # # hypothesis = ax1.plot(inten, (norm_g[0]+norm_g[1]*inten), c = 'g', label='Final Hypothesis')
+    # inten_test, sym_test, test_labels = LinearReg(sym, inten, test_data, y)
+    # w = LogGradDescent(inten, sym)
+    # print(f'Logistic Gradient Descent weights: {w}')
+    # linex = np.arange(0.0, 0.4, 0.01)
+    # liney = (linex * w[0]) + w[1]
+    # plt.plot(linex, liney, 'g')
+    # plt.xlabel("Intensity")
+    # plt.ylabel("Symmetry")
+    # plt.legend(['Linear Regression','Logestic Gradient Descent', '1', 
+    #             '5',  ], 
+    #             loc='upper right')
+    # # PlotTestData(inten_test, sym_test, test_labels, w)
+    # plt.show()
