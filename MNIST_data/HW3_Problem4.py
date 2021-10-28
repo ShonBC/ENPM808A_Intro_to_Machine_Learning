@@ -13,6 +13,14 @@ data.
 (c) Obtain a bound on the true out-of-sample error. You should get two
 bounds, one based on Ein and one based on Etest. Use a tolerance δ =
 0.05. Which is the better bound?
+
+# This completes (a) & (b) for linear regression+pocket. 
+# (c) Use the VC generalization bound (inequality 2.12 in LFD book) to obtain a bound on the true out-of-sample error based on E_in
+# Growth function (m_H) is bounded by m_H <= N^(d_vc)+1. For linear model, d_vc=d+1, where d is number of features. Here d=2, N=12163.
+# Substitute all these into the inequality 2.12. 
+# For a bound based on E_test, use the Hoeffding bound (inequality 2.1 in LFD book). 
+# Here M=1 (# of times model has been trained), N=2072 (test size). \delta=0.5 (tolerance) is the same for both cases.
+
 (d) Now repeat using a 3rd order polynomial transform.
 (e) As your final deliverable to a customer, would you use the linear model
 with or without the 3rd order polynomial transform? Explain.
@@ -38,7 +46,7 @@ def LinReg(feature, label, show_plot=False):
     lin_reg.fit(feature, label)
 
     """ Very close result to np.matmul()"""
-    # w_lin1 = lin_reg.coef_
+    # w_lin = lin_reg.coef_
 
     w_lin = np.matmul(np.matmul(np.linalg.inv(np.matmul(feature.T,feature)),feature.T),label)
 
@@ -95,20 +103,12 @@ def Pocket(feature, label, weight, show_plot=False):
         plt.scatter(feature[:6742,1],feature[:6742,2],c='b',label='1',marker='+')
         plt.scatter(feature[6742:,1],feature[6742:,2],c='r',label='5',marker='o')
         plt.plot(x_plot,y_plot,'-') 
-        
     return w_poc, Eout
 
-def ThirdOrdLogReg(feature, label, show_plot=False):
-    # Logistic Regression
-    log_reg = LogisticRegression()
-    log_reg.fit(feature, label)
+def ThirdOrdLinReg(feature, label, show_plot=False):
+    # Linear Regression with 3rd Order Polynomial Transform 
 
-    """ What is this for?"""
-    # w_log = lin_reg.coef_
-
-    # y_plot = - w_log[1]/w_log[2]*x_plot - w_log[0]/w_log[2]
-
-    # 3rd Order Polynomial feature transform
+    # 3rd Order Logistic Regression
     x1 = feature[:,1]
     x2 = feature[:,2]
     train_poly = np.column_stack((feature,x1**2,x1*x2,x2**2,x1**3,x1**2*x2,x1*x2**2,x2**3))
@@ -118,6 +118,7 @@ def ThirdOrdLogReg(feature, label, show_plot=False):
         x = np.linspace(0,0.4,100)
         y = np.linspace(-0.3,0,100)
         x,y = np.meshgrid(x,y)
+        # z =w.t*x
         z = 1*w_poly[0] + x*w_poly[1] + y*w_poly[2] + x**2*w_poly[3] + x*y*w_poly[4] + y**2*w_poly[5] + x**3*w_poly[6] + x**2*y*w_poly[7] + x*y**2*w_poly[8] + y**3*w_poly[9]
         levels = np.array([0])
         plt.scatter(feature[:6742,1],feature[:6742,2],c='b',label='1',marker='+')
@@ -140,6 +141,8 @@ def LogReg(feature, label, test_feature, test_label, show_plot=False):
         x,y = np.meshgrid(x,y)
         z = 1/(1+np.exp(-1*w_log[0] - x*w_log[1] - y*w_log[2]))
         levels = np.array([0.5])
+
+        # 6742 is last index of data labeled as 1 (intensity, symmetry)
         plt.scatter(feature[:6742,1],feature[:6742,2],c='b',label='1',marker='+')
         plt.scatter(feature[6742:,1],feature[6742:,2],c='r',label='5',marker='o')
         cs = plt.contour(x,y,z,levels)
@@ -157,7 +160,7 @@ def LogReg(feature, label, test_feature, test_label, show_plot=False):
             current_predict = +1
         if currentY != current_predict:
             Ein +=1
-    print('In-sample error with logistic regression:', Ein/12163)
+    print('In-sample error with logistic regression:', Ein/len(test_label))
 
     #compute etest
     Etest = 0
@@ -211,10 +214,10 @@ def main():
         test_feature = np.append(test_feature,(1,cur_intn,cur_symm))
     test_feature = np.reshape(test_feature,(2027,3))
 
-    w_lin = LinReg(train_feature, train_Y, False)
-    w_poc, Eout_poc = Pocket(train_feature, train_Y, w_lin, False)
+    w_lin = LinReg(train_feature, train_Y, True)
+    w_poc, Eout_poc = Pocket(train_feature, train_Y, w_lin, True)
     w_log, Ein, Etest = LogReg(train_feature, train_Y, test_feature, test_Y, True)
-    w_reg = ThirdOrdLogReg(train_feature, train_Y, False)
+    w_reg = ThirdOrdLinReg(train_feature, train_Y, True)
     plt.show()
 
 if __name__ == '__main__':
@@ -323,14 +326,14 @@ if __name__ == '__main__':
     #     if currentY != np.sign(np.dot(currentX, w_poc.T)):
     #         Eout +=1
 
-    # # Logistic Regression
+    # Logistic Regression
     # log_reg = LogisticRegression()
     # log_reg.fit(train_feature, train_Y)
     # w_log = lin_reg.coef_
 
     # y_plot = - w_log[1]/w_log[2]*x_plot - w_log[0]/w_log[2]
 
-
+    # # Linear Regression with 3rd Order Polynomial Transform 
     # x1 = train_feature[:,1]
     # x2 = train_feature[:,2]
     # train_poly = np.column_stack((train_feature,x1**2,x1*x2,x2**2,x1**3,x1**2*x2,x1*x2**2,x2**3))
