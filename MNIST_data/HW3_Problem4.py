@@ -97,6 +97,8 @@ def Pocket(feature, label, weight, show_plot=False):
         if currentY != np.sign(np.dot(currentX, w_poc.T)):
             Eout +=1
 
+    Eout = Eout / len(label)
+
     if show_plot:
         x_plot = np.linspace(0, 0.4, 100)
         y_plot = - w_poc[1]/w_poc[2]*x_plot - w_poc[0]/w_poc[2]
