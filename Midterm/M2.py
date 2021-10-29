@@ -121,6 +121,10 @@ def LinReg(feature, label, show_plot=False):
         plt.scatter(feature[:6742,1],feature[:6742,2],c='b',label='1',marker='+')
         plt.scatter(feature[6742:,1],feature[6742:,2],c='r',label='5',marker='o')
         plt.plot(x_plot,y_plot,'-') 
+        plt.xlabel("Intensity")
+        plt.ylabel("Symmetry")
+        plt.title('Linear Regression')
+        plt.legend(['Linear Regression'], loc='upper right')
 
     return w_lin
 
@@ -250,11 +254,13 @@ if __name__ == '__main__':
     e_out_lin = CalcError(test_feature, test_label, w_lin)
     train_e_bound_lin = TrainErrorBound(train_feature, e_in_lin)
     test_e_bound_lin = TestErrorBound(test_feature, e_in_lin)
-
+    
     w_poc_lin, e_in_poc_lin, e_out_poc_lin = Pocket(train_feature, train_label, w_lin, test_feature, test_label)
     train_e_bound_poc_lin = TrainErrorBound(train_feature, e_in_poc_lin)
     test_e_bound_poc_lin = TestErrorBound(test_feature, e_in_poc_lin)
+
+    ShowData(train_feature, train_label, w_poc_lin, 'g', 'Linear Regression + Pocket Training Data', 'Linear Regression + Pocket')
     
     print(f'Linear Regression: w = {w_lin} Ein = {e_in_lin} Eout = {e_out_lin} In-Sample Error Bound: {train_e_bound_lin} Test Error Bound: {test_e_bound_lin}')
     print(f'Linear Regression + Pocket: w = {w_poc_lin} Ein = {e_in_poc_lin} Eout = {e_out_poc_lin} In-Sample Error Bound: {train_e_bound_poc_lin} Test Error Bound: {test_e_bound_poc_lin}')
-
+    plt.show()
