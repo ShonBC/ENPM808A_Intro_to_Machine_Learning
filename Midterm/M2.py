@@ -155,7 +155,7 @@ def ImportData(file):
     for curX in x:
         cur_intn = intensity(curX.reshape((28, 28)))
         cur_symm = symmetry(curX.reshape((28, 28)))
-        feature = np.append(feature,(1, cur_intn, cur_symm))
+        feature = np.append(feature, (1, cur_intn, cur_symm))
     feature = np.reshape(feature, (len(label), 3))
 
     return feature, label
